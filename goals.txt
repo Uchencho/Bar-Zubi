@@ -1,0 +1,8 @@
+- Make simple requests and retrieve json
+- Create tables
+- Perform CRUD operations
+- Connect to a database (postgres)
+- Authorization
+- Authentication
+- Asynchorous Development
+- Serialize Data
