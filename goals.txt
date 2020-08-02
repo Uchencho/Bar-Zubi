@@ -6,3 +6,7 @@
 - Authentication
 - Asynchorous Development
 - Serialize Data
+
+
+Notes
+- Query param https://fastapi.tiangolo.com/tutorial/query-params/
