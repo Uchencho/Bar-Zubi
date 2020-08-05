@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 
 from .database import SessionLocal, engine
 from . import crud, models, schema
+from account.schema import RegisterSchema
+from account.views import register_user
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -48,3 +50,10 @@ def create_item_for_user(user_id: int, item: schema.ItemCreate, db: Session = De
 def read_items(skip: int=0, limit: int=100, db: Session = Depends(get_db)):
     items = crud.get_items(db, skip=skip, limit=limit)
     return items
+
+@app.post("/register", response_model=schema.User)
+def register(user: RegisterSchema, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_username(db, username=user.username)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username is already registered")
+    return register_user(db=db, user=user)
