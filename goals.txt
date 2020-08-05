@@ -10,3 +10,8 @@
 
 Notes
 - Query param https://fastapi.tiangolo.com/tutorial/query-params/
+
+To Do
+Create User table with name, email, password etc
+Create register endpoint
+Create login endpoint
