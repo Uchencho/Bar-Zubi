@@ -11,4 +11,4 @@ class Accounts(Base):
     phone_number     = Column(String)
     hashed_password  = Column(String)
     is_active        = Column(Boolean, default=True)
-    is_superuder     = Column(Boolean, default=False)
+    is_superuser     = Column(Boolean, default=False)

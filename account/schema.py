@@ -5,3 +5,13 @@ class RegisterSchema(BaseModel):
     username: str
     email: str
     password: str
+
+class UserSchema(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_active: bool
+    
+
+    class Config:
+        orm_mode = True

@@ -11,3 +11,6 @@ def register_user(db: Session, user: RegisterSchema):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def get_users(db: Session, skip: int=0, limit: int=10):
+    return db.query(Accounts).offset(skip).limit(limit).all()
