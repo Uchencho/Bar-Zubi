@@ -15,3 +15,8 @@ class UserSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class LoginCredentials(BaseModel):
+    username: str
+    password: str

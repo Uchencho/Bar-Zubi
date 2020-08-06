@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from .database import SessionLocal, engine
 from . import crud, models, schema
-from account.schema import RegisterSchema, UserSchema
-from account.views import register_user, get_users
+from account.schema import RegisterSchema, UserSchema, LoginCredentials
+from account.views import register_user, get_users, get_user_by_username
+from account.serializer import verify_password
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -50,3 +51,13 @@ def register(user: RegisterSchema, db: Session = Depends(get_db)):
 def all_users(skip: int=0, limit: int=10, db: Session = Depends(get_db)):
     users = get_users(db, skip=skip, limit=limit)
     return users
+
+@app.post("/login")
+def login(cred: LoginCredentials, db: Session = Depends(get_db)):
+    db_user = get_user_by_username(db, username=cred.username)
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Invalid Credentials")
+    verified = verify_password(cred.password, db_user.hashed_password)
+    if not verified:
+        raise HTTPException(status_code=404, detail="Invalid Credentials")
+    return db_user
