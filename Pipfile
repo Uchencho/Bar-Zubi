@@ -9,6 +9,8 @@ verify_ssl = true
 fastapi = "*"
 uvicorn = "*"
 sqlalchemy = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+passlib = {extras = ["bcrypt"], version = "*"}
 
 [requires]
 python_version = "3.7"

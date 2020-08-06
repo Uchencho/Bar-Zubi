@@ -12,6 +12,15 @@ Notes
 - Query param https://fastapi.tiangolo.com/tutorial/query-params/
 
 To Do
-Create User table with name, email, password etc
-Create register endpoint
-Create login endpoint
+Create User table with name, email, password etc     --- Done
+Create register endpoint ------------------------------- Done
+Create login endpoint ---------------------------------- Done
+
+For login:
+    Collect username and password as json -------------- Done
+    Check if user exists ------------------------------- Done
+    Check if password is correct ----------------------- Done
+    Generate token ------------------------------------- Done
+    Return payload ------------------------------------- Done
+
+Test Token is working with Authorization
