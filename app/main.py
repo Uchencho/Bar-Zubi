@@ -6,7 +6,7 @@ from .database import SessionLocal, engine
 from . import crud, models, schema
 from account.schema import RegisterSchema, UserSchema, LoginCredentials
 from account.views import register_user, get_users, get_user_by_username
-from account.serializer import verify_password
+from account.serializer import verify_password, create_access_token
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -60,4 +60,5 @@ def login(cred: LoginCredentials, db: Session = Depends(get_db)):
     verified = verify_password(cred.password, db_user.hashed_password)
     if not verified:
         raise HTTPException(status_code=404, detail="Invalid Credentials")
-    return db_user
+    access_token = create_access_token(data={"sub": db_user.username})
+    return {"data" : db_user, "token" : access_token}
