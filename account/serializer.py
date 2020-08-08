@@ -69,3 +69,21 @@ async def get_current_user(db, token: str = Depends(oauth2_schema)):
     if user is None:
         raise credentials_exception
     return user
+
+def check_auth(token: str):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"Application/json" : "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username : str = payload.get("sub")
+        if username is None:
+            print("None")
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        print("jwterror")
+        raise credentials_exception
+    return token_data.username
