@@ -5,12 +5,15 @@ class RegisterSchema(BaseModel):
     username: str
     email: str
     password: str
+    phone_number: Optional[str] = "None"
 
 class UserSchema(BaseModel):
     id: int
     username: str
     email: str
+    phone_number: str
     is_active: bool
+    is_superuser: bool
 
     class Config:
         orm_mode = True

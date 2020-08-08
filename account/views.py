@@ -6,7 +6,7 @@ from .models import Accounts
 def register_user(db: Session, user: RegisterSchema):
     pw = get_password_hash(user.password)
     db_user = Accounts(email=user.email, username=user.username, 
-                        hashed_password=pw)
+                        hashed_password=pw, phone_number=user.phone_number)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

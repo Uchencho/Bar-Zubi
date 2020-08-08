@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from account import models
 from .database import SessionLocal, engine
 from account.schema import RegisterSchema, UserSchema, LoginCredentials
-from account.views import register_user, get_user_by_username
+from account.views import register_user, get_user_by_username, get_users
 from account.serializer import authenticate_user, create_access_token
 
 models.Base.metadata.create_all(bind=engine)
@@ -38,3 +38,9 @@ def login(cred: LoginCredentials, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Invalid Credentials")
     access_token = create_access_token(data={"sub": db_user.username})
     return {"data" : db_user, "token" : access_token}
+
+@app.get("/users", response_model=List[UserSchema])
+def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
+    users = get_users(db, skip=skip, limit=limit)
+    return users
+    
