@@ -1,8 +1,8 @@
-- Make simple requests and retrieve json
-- Create tables
-- Perform CRUD operations
+- Make simple requests and retrieve json -------------- Done
+- Create tables --------------------------------------- Done
+- Perform CRUD operations ----------------------------- Done
 - Connect to a database (postgres)
-- Authorization
+- Authorization --------------------------------------- Done
 - Authentication
 - Asynchorous Development
 - Serialize Data
@@ -24,3 +24,5 @@ For login:
     Return payload ------------------------------------- Done
 
 Test Token is working with Authorization
+Create a new Table that store Request : Name(foreign key), Description, Status (Completed)
+Do Crud for this Table
