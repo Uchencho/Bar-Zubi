@@ -5,18 +5,30 @@ class RegisterSchema(BaseModel):
     username: str
     email: str
     password: str
+    phone_number: Optional[str] = "None"
 
 class UserSchema(BaseModel):
     id: int
     username: str
     email: str
+    phone_number: str
     is_active: bool
-    
+    is_superuser: bool
 
     class Config:
         orm_mode = True
 
-
 class LoginCredentials(BaseModel):
     username: str
     password: str
+
+class EnquirySchema(BaseModel):
+    question: str
+    username: Optional[str] = "None"
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
