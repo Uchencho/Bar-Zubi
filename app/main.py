@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from account import models
 from .database import SessionLocal, engine
-from account.schema import RegisterSchema, UserSchema, LoginCredentials
-from account.views import register_user, get_user_by_username, get_users
+from account.schema import RegisterSchema, UserSchema, LoginCredentials, EnquirySchema
+from account.views import register_user, get_user_by_username, get_users, create_enquiry
 from account.serializer import authenticate_user, create_access_token, check_auth
 
 models.Base.metadata.create_all(bind=engine)
@@ -48,9 +48,19 @@ def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
     
 @app.get("/auth_users")
 def read_auth_users(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    username = check_auth(token)
-    if username != False:
+    authorized, username = check_auth(token)
+    if authorized:
         db_user = get_user_by_username(db, username=username)
         return db_user
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
+
+
+@app.post("/enquiry")
+def make_enquiry(enq: EnquirySchema, response: Response, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    authorized, username = check_auth(token)
+    if authorized:
+        enq.username = username
+        return create_enquiry(db=db, inp_enq=enq)
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}   

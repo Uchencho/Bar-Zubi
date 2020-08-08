@@ -22,6 +22,9 @@ class LoginCredentials(BaseModel):
     username: str
     password: str
 
+class EnquirySchema(BaseModel):
+    question: str
+    username: Optional[str] = "None"
 
 class Token(BaseModel):
     access_token: str
