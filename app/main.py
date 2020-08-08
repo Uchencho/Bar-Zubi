@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Header
+from fastapi import FastAPI, Depends, HTTPException, Response, status
 from fastapi.security import OAuth2PasswordBearer
 from typing import List, Optional
 from sqlalchemy.orm import Session
@@ -47,9 +47,10 @@ def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
     return users
     
 @app.get("/auth_users")
-def read_auth_users(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def read_auth_users(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     username = check_auth(token)
-    if username:
+    if username != False:
         db_user = get_user_by_username(db, username=username)
         return db_user
-    return {"data" : username}
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}
