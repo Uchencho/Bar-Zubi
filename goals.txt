@@ -3,9 +3,9 @@
 - Perform CRUD operations ----------------------------- Done
 - Connect to a database (postgres)
 - Authorization --------------------------------------- Done
-- Authentication
+- Authentication -------------------------------------- Done
 - Asynchorous Development
-- Serialize Data
+- Serialize Data -------------------------------------- Done
 
 
 Notes

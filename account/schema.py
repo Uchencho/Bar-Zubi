@@ -26,6 +26,14 @@ class EnquirySchema(BaseModel):
     question: str
     username: Optional[str] = "None"
 
+class AllEnquirySchema(BaseModel):
+    id: int
+    username: str
+    question: str
+
+    class Config:
+        orm_mode = True
+
 class Token(BaseModel):
     access_token: str
     token_type: str

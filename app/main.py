@@ -5,8 +5,15 @@ from sqlalchemy.orm import Session
 
 from account import models
 from .database import SessionLocal, engine
-from account.schema import RegisterSchema, UserSchema, LoginCredentials, EnquirySchema
-from account.views import register_user, get_user_by_username, get_users, create_enquiry
+from account.schema import (
+                            RegisterSchema, UserSchema, 
+                            LoginCredentials, EnquirySchema,
+                            AllEnquirySchema)
+from account.views import (
+                            register_user, get_user_by_username, 
+                            get_users, create_enquiry,
+                            get_enquiry_by_username
+                            )
 from account.serializer import authenticate_user, create_access_token, check_auth
 
 models.Base.metadata.create_all(bind=engine)
@@ -63,4 +70,14 @@ def make_enquiry(enq: EnquirySchema, response: Response, db: Session = Depends(g
         enq.username = username
         return create_enquiry(db=db, inp_enq=enq)
     response.status_code = status.HTTP_401_UNAUTHORIZED
-    return {"message" : "Authentication credentials were not provided"}   
+    return {"message" : "Authentication credentials were not provided"}
+
+
+@app.get("/enquiries")
+def all_questions(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, username = check_auth(token)
+    if authorized:
+        questions = get_enquiry_by_username(db, username=username)
+        return questions
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}
