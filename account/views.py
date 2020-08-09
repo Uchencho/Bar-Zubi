@@ -18,8 +18,12 @@ def get_users(db: Session, skip: int=0, limit: int=10):
 def get_user_by_username(db: Session, username: str):
     return db.query(Accounts).filter(Accounts.username == username).first()
 
-def get_enquiry_by_username(db: Session, username: str):
+def get_enquiry(db: Session, username: str):
     return db.query(Questions).filter(Questions.username == username).all()
+
+def get_enquiry_by_id(db: Session, username: str, enquire_id: int):
+    return db.query(Questions).filter(Questions.username == username, 
+                                      Questions.id == enquire_id).all()
 
 def create_enquiry(db: Session, inp_enq: EnquirySchema):
     enq_mod = Questions(username=inp_enq.username, question=inp_enq.question)
