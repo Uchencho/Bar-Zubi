@@ -12,7 +12,8 @@ from account.schema import (
 from account.views import (
                             register_user, get_user_by_username, 
                             get_users, create_enquiry,
-                            get_enquiry, get_enquiry_by_id
+                            get_enquiry, get_enquiry_by_id,
+                            update_enquiry
                             )
 from account.serializer import authenticate_user, create_access_token, check_auth
 
@@ -88,6 +89,22 @@ def question_detail(response: Response, enquire_id: int, token: str = Depends(oa
     authorized, username = check_auth(token)
     if authorized:
         question = get_enquiry_by_id(db, username=username, enquire_id=enquire_id)
+        if len(question) > 0:
+            return question
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return {"message" : "Not Found"}
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}
+
+
+@app.put("/enquiries/{enquire_id}")
+def edit_question(enq: EnquirySchema, response: Response, enquire_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, username = check_auth(token)
+    if authorized:
+        question = update_enquiry(db, username=username, enquire_id=enquire_id, question=enq.question)
+        if question == None:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {"message" : "Not Found"}
         return question
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
