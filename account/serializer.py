@@ -51,6 +51,13 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def create_refresh_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(days=1)
+    to_encode.update({"exp" : expire})
+    refresh_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return refresh_jwt
+
 def check_auth(token: str):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -61,3 +68,16 @@ def check_auth(token: str):
     except JWTError:
         return False, "None"
     return True, token_data.username
+
+# def check_refresh_token(token: str):
+#     try:
+#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#         username : str = payload.get("sub")
+#         if username is None:
+#             return False, "None", "None"
+#         token_data = TokenData(username=username)
+#         new_access_token = create_access_token(data={"sub" : token_data.username})
+#         new_refresh_token = create_refresh_token(data={"sub" : token_data.username})
+#     except JWTError:
+#         return False, "None", "None"
+#     return True, new_access_token, new_refresh_token

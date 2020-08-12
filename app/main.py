@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Response, status
+from fastapi import FastAPI, Depends, HTTPException, Response, status, Cookie, Request
 from fastapi.security import OAuth2PasswordBearer
 from typing import List, Optional
 from sqlalchemy.orm import Session
@@ -9,13 +9,20 @@ from account.schema import (
                             RegisterSchema, UserSchema, 
                             LoginCredentials, EnquirySchema,
                             AllEnquirySchema)
+
 from account.views import (
                             register_user, get_user_by_username, 
                             get_users, create_enquiry,
                             get_enquiry, get_enquiry_by_id,
-                            update_enquiry
+                            update_enquiry, delete_enquiry
                             )
-from account.serializer import authenticate_user, create_access_token, check_auth
+
+from account.serializer import (
+                                authenticate_user, 
+                                create_access_token, 
+                                check_auth, 
+                                create_refresh_token
+                                )
 
 models.Base.metadata.create_all(bind=engine)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -42,12 +49,37 @@ def register(user: RegisterSchema, db: Session = Depends(get_db)):
     return register_user(db=db, user=user)
 
 @app.post("/login")
-def login(cred: LoginCredentials, db: Session = Depends(get_db)):
+def login(response: Response, cred: LoginCredentials, db: Session = Depends(get_db)):
     db_user = authenticate_user(db, username=cred.username, password=cred.password)
     if not db_user:
-        raise HTTPException(status_code=404, detail="Invalid Credentials")
+        raise HTTPException(status_code=400, detail="Invalid Credentials")
     access_token = create_access_token(data={"sub": db_user.username})
-    return {"data" : db_user, "token" : access_token}
+    refresh_token = create_refresh_token(data={"sub": db_user.username})
+    response.set_cookie(key="refresh", value=refresh_token, httponly=True)
+
+    return {
+        "username" : db_user.username,
+        "email" : db_user.email,
+        "phone_number" : db_user.phone_number,
+        "is_active" : db_user.is_active,
+        "access_token" : access_token
+    }
+
+@app.post("/refresh-token")
+def refresh(response: Response, request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("refresh", "Not available") == "Not available":
+        raise HTTPException(status_code=400, detail="Credentials not sent")
+    authorized, username = check_auth(request.cookies.get("refresh"))
+    if not authorized:
+        raise HTTPException(status_code=400, detail="Invalid Credentials")
+    access_token = create_access_token(data={"sub": username})
+    refresh_token = create_refresh_token(data={"sub": username})
+    response.set_cookie(key="refresh", value=refresh_token, httponly=True)
+
+    return {"access_token" : access_token}
+
+# @app.delete("/logout")
+# def logout()
 
 @app.get("/users", response_model=List[UserSchema])
 def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
@@ -105,6 +137,20 @@ def edit_question(enq: EnquirySchema, response: Response, enquire_id: int, token
         if question == None:
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"message" : "Not Found"}
+        return question
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}
+
+
+@app.delete("/enquiries/{enquire_id}")
+def del_question(enq: EnquirySchema, response: Response, enquire_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, username = check_auth(token)
+    if authorized:
+        question = delete_enquiry(db, username=username, enquire_id=enquire_id, question=enq.question)
+        if question == None:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {"message" : "Not Found"}
+        response.status_code = status.HTTP_204_NO_CONTENT
         return question
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}

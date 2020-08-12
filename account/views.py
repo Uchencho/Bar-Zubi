@@ -35,6 +35,15 @@ def update_enquiry(db: Session, username: str, enquire_id: int, question: str):
     db.refresh(question_mod)
     return question_mod
 
+def delete_enquiry(db: Session, username: str, enquire_id: int, question: str):
+    question_mod = db.query(Questions).filter(Questions.username == username, 
+                                      Questions.id == enquire_id)
+    if question_mod.first() == None:
+        return None
+    question_mod.delete()
+    db.commit()
+    return "Deleted Successfully"
+
 def create_enquiry(db: Session, inp_enq: EnquirySchema):
     enq_mod = Questions(username=inp_enq.username, question=inp_enq.question)
     db.add(enq_mod)
