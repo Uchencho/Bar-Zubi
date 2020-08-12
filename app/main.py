@@ -13,7 +13,7 @@ from account.views import (
                             register_user, get_user_by_username, 
                             get_users, create_enquiry,
                             get_enquiry, get_enquiry_by_id,
-                            update_enquiry
+                            update_enquiry, delete_enquiry
                             )
 from account.serializer import authenticate_user, create_access_token, check_auth
 
@@ -102,6 +102,19 @@ def edit_question(enq: EnquirySchema, response: Response, enquire_id: int, token
     authorized, username = check_auth(token)
     if authorized:
         question = update_enquiry(db, username=username, enquire_id=enquire_id, question=enq.question)
+        if question == None:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {"message" : "Not Found"}
+        return question
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}
+
+
+@app.delete("/enquiries/{enquire_id}")
+def del_question(enq: EnquirySchema, response: Response, enquire_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, username = check_auth(token)
+    if authorized:
+        question = delete_enquiry(db, username=username, enquire_id=enquire_id, question=enq.question)
         if question == None:
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"message" : "Not Found"}
