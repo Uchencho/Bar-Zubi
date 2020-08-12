@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Response, status
+from fastapi import FastAPI, Depends, HTTPException, Response, status, Cookie, Request
 from fastapi.security import OAuth2PasswordBearer
 from typing import List, Optional
 from sqlalchemy.orm import Session
@@ -64,6 +64,22 @@ def login(response: Response, cred: LoginCredentials, db: Session = Depends(get_
         "is_active" : db_user.is_active,
         "access_token" : access_token
     }
+
+@app.post("/refresh-token")
+def refresh(response: Response, request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("refresh", "Not available") == "Not available":
+        raise HTTPException(status_code=400, detail="Credentials not sent")
+    authorized, username = check_auth(request.cookies.get("refresh"))
+    if not authorized:
+        raise HTTPException(status_code=400, detail="Invalid Credentials")
+    access_token = create_access_token(data={"sub": username})
+    refresh_token = create_refresh_token(data={"sub": username})
+    response.set_cookie(key="refresh", value=refresh_token, httponly=True)
+
+    return {"access_token" : access_token}
+
+# @app.delete("/logout")
+# def logout()
 
 @app.get("/users", response_model=List[UserSchema])
 def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
