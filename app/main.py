@@ -9,13 +9,20 @@ from account.schema import (
                             RegisterSchema, UserSchema, 
                             LoginCredentials, EnquirySchema,
                             AllEnquirySchema)
+
 from account.views import (
                             register_user, get_user_by_username, 
                             get_users, create_enquiry,
                             get_enquiry, get_enquiry_by_id,
                             update_enquiry, delete_enquiry
                             )
-from account.serializer import authenticate_user, create_access_token, check_auth
+
+from account.serializer import (
+                                authenticate_user, 
+                                create_access_token, 
+                                check_auth, 
+                                create_refresh_token
+                                )
 
 models.Base.metadata.create_all(bind=engine)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -42,12 +49,21 @@ def register(user: RegisterSchema, db: Session = Depends(get_db)):
     return register_user(db=db, user=user)
 
 @app.post("/login")
-def login(cred: LoginCredentials, db: Session = Depends(get_db)):
+def login(response: Response, cred: LoginCredentials, db: Session = Depends(get_db)):
     db_user = authenticate_user(db, username=cred.username, password=cred.password)
     if not db_user:
-        raise HTTPException(status_code=404, detail="Invalid Credentials")
+        raise HTTPException(status_code=400, detail="Invalid Credentials")
     access_token = create_access_token(data={"sub": db_user.username})
-    return {"data" : db_user, "token" : access_token}
+    refresh_token = create_refresh_token(data={"sub": db_user.username})
+    response.set_cookie(key="refresh", value=refresh_token, httponly=True)
+
+    return {
+        "username" : db_user.username,
+        "email" : db_user.email,
+        "phone_number" : db_user.phone_number,
+        "is_active" : db_user.is_active,
+        "access_token" : access_token
+    }
 
 @app.get("/users", response_model=List[UserSchema])
 def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
