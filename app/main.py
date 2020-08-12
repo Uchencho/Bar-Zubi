@@ -118,6 +118,7 @@ def del_question(enq: EnquirySchema, response: Response, enquire_id: int, token:
         if question == None:
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"message" : "Not Found"}
+        response.status_code = status.HTTP_204_NO_CONTENT
         return question
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}

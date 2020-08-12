@@ -38,7 +38,7 @@ def update_enquiry(db: Session, username: str, enquire_id: int, question: str):
 def delete_enquiry(db: Session, username: str, enquire_id: int, question: str):
     question_mod = db.query(Questions).filter(Questions.username == username, 
                                       Questions.id == enquire_id)
-    if question_mod == None:
+    if question_mod.first() == None:
         return None
     question_mod.delete()
     db.commit()

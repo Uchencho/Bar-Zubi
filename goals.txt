@@ -12,17 +12,21 @@ Notes
 - Query param https://fastapi.tiangolo.com/tutorial/query-params/
 
 To Do
-Create User table with name, email, password etc     --- Done
-Create register endpoint ------------------------------- Done
-Create login endpoint ---------------------------------- Done
-
-For login:
-    Collect username and password as json -------------- Done
-    Check if user exists ------------------------------- Done
-    Check if password is correct ----------------------- Done
-    Generate token ------------------------------------- Done
-    Return payload ------------------------------------- Done
+- Return refresh token and check that it works
+- Send token in cookies
+- Remove password field from being returned
+- Use basic token for register view
+- verify that basic token works
+- Endpoint for making a user a superuser
+- Backoffice Duties: See all those who have asked questions
+- segment routes into different apps, like urls.py sort of scenario
 
 Test Token is working with Authorization
 Create a new Table that store Request : Name(foreign key), Description, Status (Completed)
 Do Crud for this Table
+
+Capabilities
+- create an account
+- Login returns details including access token
+
+
