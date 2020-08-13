@@ -69,15 +69,23 @@ def check_auth(token: str):
         return False, "None"
     return True, token_data.username
 
-# def check_refresh_token(token: str):
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         username : str = payload.get("sub")
-#         if username is None:
-#             return False, "None", "None"
-#         token_data = TokenData(username=username)
-#         new_access_token = create_access_token(data={"sub" : token_data.username})
-#         new_refresh_token = create_refresh_token(data={"sub" : token_data.username})
-#     except JWTError:
-#         return False, "None", "None"
-#     return True, new_access_token, new_refresh_token
+
+def check_basic_auth(token: str):
+    if token == "99b09388ebc52a5264c8e1c8c16dabee37e08834e901a27e2ecd4f8a29223334":
+        return True
+    return False
+
+def check_admin_auth(token: str, db: Session):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username : str = payload.get("sub")
+        if username is None:
+            return False, "None"
+        token_data = TokenData(username=username)
+        db_user = views.get_user_by_username(db, token_data.username)
+        if db_user.is_superuser == False:
+            return False, "None"
+    except JWTError:
+        return False, "None"
+    return True, token_data.username
+
