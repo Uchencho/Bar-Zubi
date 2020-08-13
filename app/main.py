@@ -18,10 +18,8 @@ from account.views import (
                             )
 
 from account.serializer import (
-                                authenticate_user, 
-                                create_access_token, 
-                                check_auth, 
-                                create_refresh_token
+                                authenticate_user, create_access_token, 
+                                check_auth, create_refresh_token, check_basic_auth
                                 )
 
 models.Base.metadata.create_all(bind=engine)
@@ -42,14 +40,20 @@ def get_db():
 
 
 @app.post("/register", response_model=UserSchema)
-def register(user: RegisterSchema, db: Session = Depends(get_db)):
+def register(user: RegisterSchema, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    if not check_basic_auth(token):
+        raise HTTPException(status_code=401, detail="Not Authenticated")
+
     db_user = get_user_by_username(db, username=user.username)
     if db_user:
         raise HTTPException(status_code=400, detail="Username is already registered")
     return register_user(db=db, user=user)
 
 @app.post("/login")
-def login(response: Response, cred: LoginCredentials, db: Session = Depends(get_db)):
+def login(response: Response, cred: LoginCredentials, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    if not check_basic_auth(token):
+        raise HTTPException(status_code=401, detail="Not Authenticated")
+
     db_user = authenticate_user(db, username=cred.username, password=cred.password)
     if not db_user:
         raise HTTPException(status_code=400, detail="Invalid Credentials")
@@ -75,11 +79,19 @@ def refresh(response: Response, request: Request, db: Session = Depends(get_db))
     access_token = create_access_token(data={"sub": username})
     refresh_token = create_refresh_token(data={"sub": username})
     response.set_cookie(key="refresh", value=refresh_token, httponly=True)
-
+    response.status_code = status.HTTP_201_CREATED
     return {"access_token" : access_token}
 
-# @app.delete("/logout")
-# def logout()
+@app.post("/logout")
+def logout(response: Response, request: Request, db: Session = Depends(get_db)):
+    if request.cookies.get("refresh", "Not available") == "Not available":
+        raise HTTPException(status_code=400, detail="Credentials not sent")
+    authorized, _ = check_auth(request.cookies.get("refresh"))
+    if not authorized:
+        raise HTTPException(status_code=400, detail="Invalid Credentials")
+    response.status_code = status.HTTP_204_NO_CONTENT
+    response.delete_cookie(key="refresh")
+    return {"message" : "Logged out successfully"}
 
 @app.get("/users", response_model=List[UserSchema])
 def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):

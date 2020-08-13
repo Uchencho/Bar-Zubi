@@ -12,9 +12,9 @@ Notes
 - Query param https://fastapi.tiangolo.com/tutorial/query-params/
 
 To Do
-- Return refresh token and check that it works
-- Send token in cookies
-- Remove password field from being returned
+- Return refresh token and check that it works --------- Done
+- Send token in cookies -------------------------------- Done
+- Remove password field from being returned ------------ Done
 - Use basic token for register view
 - verify that basic token works
 - Endpoint for making a user a superuser
