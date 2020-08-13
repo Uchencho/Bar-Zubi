@@ -19,7 +19,8 @@ from account.views import (
 
 from account.serializer import (
                                 authenticate_user, create_access_token, 
-                                check_auth, create_refresh_token, check_basic_auth
+                                check_auth, create_refresh_token, 
+                                check_basic_auth, check_admin_auth
                                 )
 
 models.Base.metadata.create_all(bind=engine)
@@ -98,8 +99,8 @@ def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
     users = get_users(db, skip=skip, limit=limit)
     return users
     
-@app.get("/auth_users")
-def read_auth_users(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+@app.get("/user")
+def user_profile(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     authorized, username = check_auth(token)
     if authorized:
         db_user = get_user_by_username(db, username=username)
@@ -166,3 +167,12 @@ def del_question(enq: EnquirySchema, response: Response, enquire_id: int, token:
         return question
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
+
+@app.get("/all-users")
+def all_users(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, _ = check_admin_auth(token, db)
+    if authorized:
+        db_user = get_users(db)
+        return db_user
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Not authorized to view this resource"}

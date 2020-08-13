@@ -6,6 +6,7 @@ class RegisterSchema(BaseModel):
     email: str
     password: str
     phone_number: Optional[str] = "None"
+    is_superuser: Optional[bool] = False
 
 class UserSchema(BaseModel):
     id: int
