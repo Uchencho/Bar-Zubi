@@ -27,6 +27,10 @@ class EnquirySchema(BaseModel):
     question: str
     username: Optional[str] = "None"
 
+class ProfileSchema(BaseModel):
+    phone_number: str
+    username: Optional[str] = "None"
+
 class AllEnquirySchema(BaseModel):
     id: int
     username: str

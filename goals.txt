@@ -17,7 +17,7 @@ To Do
 - Remove password field from being returned ------------ Done
 - Use basic token for register view -------------------- Done
 - verify that basic token works ------------------------ Done
-- Deal with unique constraint for email on login
+- Deal with unique constraint for email on login ------- Done
 - Endpoint for making a user a superuser
 - Backoffice Duties: See all those who have asked questions
 - segment routes into different apps, like urls.py sort of scenario

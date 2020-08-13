@@ -8,11 +8,11 @@ from .database import SessionLocal, engine
 from account.schema import (
                             RegisterSchema, UserSchema, 
                             LoginCredentials, EnquirySchema,
-                            AllEnquirySchema)
+                            AllEnquirySchema, ProfileSchema)
 
 from account.views import (
-                            register_user, get_user_by_username, 
-                            get_users, create_enquiry,
+                            register_user, get_user, get_user_by_username,
+                            get_users, create_enquiry, update_profile,
                             get_enquiry, get_enquiry_by_id,
                             update_enquiry, delete_enquiry
                             )
@@ -45,9 +45,9 @@ def register(user: RegisterSchema, token: str = Depends(oauth2_scheme), db: Sess
     if not check_basic_auth(token):
         raise HTTPException(status_code=401, detail="Not Authenticated")
 
-    db_user = get_user_by_username(db, username=user.username)
-    if db_user:
-        raise HTTPException(status_code=400, detail="Username is already registered")
+    db_user = get_user(db, username=user.username, email=user.email)
+    if not db_user:
+        raise HTTPException(status_code=400, detail="Username/email already registered")
     return register_user(db=db, user=user)
 
 @app.post("/login")
@@ -94,11 +94,8 @@ def logout(response: Response, request: Request, db: Session = Depends(get_db)):
     response.delete_cookie(key="refresh")
     return {"message" : "Logged out successfully"}
 
-@app.get("/users", response_model=List[UserSchema])
-def read_users(skip: int = 0, limit: int=100, db: Session = Depends(get_db)):
-    users = get_users(db, skip=skip, limit=limit)
-    return users
-    
+
+
 @app.get("/user")
 def user_profile(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     authorized, username = check_auth(token)
@@ -107,6 +104,17 @@ def user_profile(response: Response, token: str = Depends(oauth2_scheme), db: Se
         return db_user
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
+
+@app.put("/user")
+def edit_profile(response: Response, data: ProfileSchema, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, username = check_auth(token)
+    if authorized:
+        db_user = update_profile(db, username=username, phone_number=data.phone_number)
+        response.status_code = status.HTTP_202_ACCEPTED
+        return db_user
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}
+
 
 
 @app.post("/enquiry")
@@ -118,7 +126,6 @@ def make_enquiry(enq: EnquirySchema, response: Response, db: Session = Depends(g
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
 
-
 @app.get("/enquiries")
 def all_questions(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     authorized, username = check_auth(token)
@@ -127,7 +134,6 @@ def all_questions(response: Response, token: str = Depends(oauth2_scheme), db: S
         return questions
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
-
 
 @app.get("/enquiries/{enquire_id}")
 def question_detail(response: Response, enquire_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -141,7 +147,6 @@ def question_detail(response: Response, enquire_id: int, token: str = Depends(oa
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
 
-
 @app.put("/enquiries/{enquire_id}")
 def edit_question(enq: EnquirySchema, response: Response, enquire_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     authorized, username = check_auth(token)
@@ -153,7 +158,6 @@ def edit_question(enq: EnquirySchema, response: Response, enquire_id: int, token
         return question
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
-
 
 @app.delete("/enquiries/{enquire_id}")
 def del_question(enq: EnquirySchema, response: Response, enquire_id: int, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -167,6 +171,8 @@ def del_question(enq: EnquirySchema, response: Response, enquire_id: int, token:
         return question
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Authentication credentials were not provided"}
+
+
 
 @app.get("/all-users")
 def all_users(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
