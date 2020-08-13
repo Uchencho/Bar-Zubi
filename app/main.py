@@ -13,7 +13,7 @@ from account.schema import (
 from account.views import (
                             register_user, get_user, get_user_by_username,
                             get_users, create_enquiry, update_profile,
-                            get_enquiry, get_enquiry_by_id,
+                            get_enquiry, get_enquiry_by_id, all_enquiries,
                             update_enquiry, delete_enquiry
                             )
 
@@ -182,3 +182,12 @@ def all_users(response: Response, token: str = Depends(oauth2_scheme), db: Sessi
         return db_user
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return {"message" : "Not authorized to view this resource"}
+
+@app.get("/questions")
+def admin_enquiries(response: Response, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    authorized, _ = check_admin_auth(token, db)
+    if authorized:
+        questions = all_enquiries(db)
+        return questions
+    response.status_code = status.HTTP_401_UNAUTHORIZED
+    return {"message" : "Authentication credentials were not provided"}

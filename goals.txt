@@ -18,7 +18,7 @@ To Do
 - Use basic token for register view -------------------- Done
 - verify that basic token works ------------------------ Done
 - Deal with unique constraint for email on login ------- Done
-- Endpoint for making a user a superuser
+- Endpoint for making a user a superuser --------------- Done
 - Backoffice Duties: See all those who have asked questions
 - segment routes into different apps, like urls.py sort of scenario
 

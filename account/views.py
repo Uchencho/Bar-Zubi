@@ -26,6 +26,9 @@ def get_user_by_username(db: Session, username: str):
 def get_enquiry(db: Session, username: str):
     return db.query(Questions).filter(Questions.username == username).all()
 
+def all_enquiries(db: Session):
+    return db.query(Questions).all()
+
 def get_enquiry_by_id(db: Session, username: str, enquire_id: int):
     return db.query(Questions).filter(Questions.username == username, 
                                       Questions.id == enquire_id).all()
