@@ -14,7 +14,7 @@ from account.views import (
                             register_user, get_user, get_user_by_username,
                             get_users, create_enquiry, update_profile,
                             get_enquiry, get_enquiry_by_id, all_enquiries,
-                            update_enquiry, delete_enquiry
+                            update_enquiry, delete_enquiry, send_email
                             )
 
 from account.serializer import (
@@ -46,7 +46,9 @@ def register(user: RegisterSchema, token: str = Depends(oauth2_scheme), db: Sess
         raise HTTPException(status_code=401, detail="Not Authenticated")
 
     db_user = get_user(db, username=user.username, email=user.email)
-    if not db_user:
+    if not send_email(user.email, user.username):
+        raise HTTPException(status_code=400, detail="Not Sent")
+    if db_user:
         raise HTTPException(status_code=400, detail="Username/email already registered")
     return register_user(db=db, user=user)
 

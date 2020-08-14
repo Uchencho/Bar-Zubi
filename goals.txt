@@ -12,14 +12,6 @@ Notes
 - Query param https://fastapi.tiangolo.com/tutorial/query-params/
 
 To Do
-- Return refresh token and check that it works --------- Done
-- Send token in cookies -------------------------------- Done
-- Remove password field from being returned ------------ Done
-- Use basic token for register view -------------------- Done
-- verify that basic token works ------------------------ Done
-- Deal with unique constraint for email on login ------- Done
-- Endpoint for making a user a superuser --------------- Done
-- Backoffice Duties: See all those who have asked questions
 - segment routes into different apps, like urls.py sort of scenario
 
 Test Token is working with Authorization
@@ -29,5 +21,3 @@ Do Crud for this Table
 Capabilities
 - create an account
 - Login returns details including access token
-
-
