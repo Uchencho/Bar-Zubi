@@ -91,5 +91,4 @@ def send_email(recepient: str, username: str):
             return False 
         text = msg.as_string()
         server.sendmail(from_address, recepient, text)
-        print("\n\nEmail sent successfully\n\n")
         return True
