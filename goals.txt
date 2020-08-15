@@ -1,23 +1,21 @@
 - Make simple requests and retrieve json -------------- Done
 - Create tables --------------------------------------- Done
 - Perform CRUD operations ----------------------------- Done
-- Connect to a database (postgres)
+- Connect to a database (postgres) -------------------- Next project, no big deal
 - Authorization --------------------------------------- Done
 - Authentication -------------------------------------- Done
-- Asynchorous Development
+- Asynchorous Development ----------------------------- Not done, orm issues
 - Serialize Data -------------------------------------- Done
-
-
-Notes
-- Query param https://fastapi.tiangolo.com/tutorial/query-params/
 
 To Do
 - segment routes into different apps, like urls.py sort of scenario
 
-Test Token is working with Authorization
-Create a new Table that store Request : Name(foreign key), Description, Status (Completed)
-Do Crud for this Table
-
 Capabilities
-- create an account
-- Login returns details including access token
+- Register with email and username
+- Send email upon registeration as a background task
+- Saves details to database
+- Login returns access token and sends refresh token in the cookies
+- Get profile of a user and edit the profile
+- Make enquiries, see all enquiries, edit and delete enquiries
+- See all users, admin access
+- See all questions, admin access

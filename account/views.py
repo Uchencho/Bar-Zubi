@@ -88,7 +88,6 @@ def send_email(recepient: str, username: str):
         try:
             server.login(from_address, pw)
         except smtplib.SMTPAuthenticationError:
-            return False 
+            pass
         text = msg.as_string()
         server.sendmail(from_address, recepient, text)
-        return True
