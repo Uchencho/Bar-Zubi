@@ -1,7 +1,11 @@
 from sqlalchemy.orm import Session
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib, ssl
 from .schema import RegisterSchema, EnquirySchema
 from .serializer import get_password_hash
 from .models import Accounts, Questions
+import settings
 
 def register_user(db: Session, user: RegisterSchema):
     pw = get_password_hash(user.password)
@@ -65,3 +69,26 @@ def create_enquiry(db: Session, inp_enq: EnquirySchema):
     db.commit()
     db.refresh(enq_mod)
     return enq_mod
+
+def send_email(recepient: str, username: str):
+    from_address = settings.EMAIL_HOST_USER
+    pw = settings.EMAIL_HOST_PASSWORD
+    reply_to = settings.EMAIL_HOST_USER
+
+    msg = MIMEMultipart()
+    msg['From'] = "Barister Zubi"
+    msg["To"] = recepient
+    msg["In-Reply-To"] = reply_to
+    msg["Subject"] = "Barrister Zubi Enterprise"
+    body = f"Welcome distinguished {username}, rest assured you have been placed in safe hands"
+    msg.attach(MIMEText(body, 'plain'))
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", settings.EMAIL_PORT, context=context) as server:
+        try:
+            server.login(from_address, pw)
+        except smtplib.SMTPAuthenticationError:
+            pass #Because it is a background task
+        text = msg.as_string()
+        server.sendmail(from_address, recepient, text)
+

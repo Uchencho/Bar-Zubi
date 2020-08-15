@@ -1,4 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException, Response, status, Cookie, Request
+from fastapi import (
+                        FastAPI, Depends, HTTPException, 
+                        Response, status, Cookie, Request,
+                        BackgroundTasks
+                        )
 from fastapi.security import OAuth2PasswordBearer
 from typing import List, Optional
 from sqlalchemy.orm import Session
@@ -14,7 +18,7 @@ from account.views import (
                             register_user, get_user, get_user_by_username,
                             get_users, create_enquiry, update_profile,
                             get_enquiry, get_enquiry_by_id, all_enquiries,
-                            update_enquiry, delete_enquiry
+                            update_enquiry, delete_enquiry, send_email
                             )
 
 from account.serializer import (
@@ -41,13 +45,13 @@ def get_db():
 
 
 @app.post("/register", response_model=UserSchema)
-def register(user: RegisterSchema, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+def register(user: RegisterSchema, background: BackgroundTasks, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     if not check_basic_auth(token):
         raise HTTPException(status_code=401, detail="Not Authenticated")
-
     db_user = get_user(db, username=user.username, email=user.email)
-    if not db_user:
+    if db_user:
         raise HTTPException(status_code=400, detail="Username/email already registered")
+    background.add_task(send_email, user.email, user.username)
     return register_user(db=db, user=user)
 
 @app.post("/login")
