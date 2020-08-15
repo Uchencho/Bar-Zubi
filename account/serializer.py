@@ -10,11 +10,7 @@ from sqlalchemy.orm import Session
 
 from . import views
 from .schema import TokenData
-
-# openssl rand -hex 32
-SECRET_KEY = "3525b9e881f4d0c5d530b334fca352e5cb4b2ba9ecd5b046b8afec1619780e41"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+from settings import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES, BASIC_TOKEN_SECRET
 
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='token')
@@ -71,8 +67,7 @@ def check_auth(token: str):
 
 
 def check_basic_auth(token: str):
-    if token == "99b09388ebc52a5264c8e1c8c16dabee37e08834e901a27e2ecd4f8a29223334":
-        return True
+    if token == BASIC_TOKEN_SECRET: return True
     return False
 
 def check_admin_auth(token: str, db: Session):

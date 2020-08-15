@@ -88,6 +88,7 @@ def send_email(recepient: str, username: str):
         try:
             server.login(from_address, pw)
         except smtplib.SMTPAuthenticationError:
-            pass
+            pass #Because it is a background task
         text = msg.as_string()
         server.sendmail(from_address, recepient, text)
+
